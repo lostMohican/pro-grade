@@ -51,7 +51,20 @@ deny {
 	permission java.io.FilePermission "/tmp/static/-", "write";
 };
 ```
+## Working with Gradle
 
+Gradle has its own Security Manager so whenever a policy file with deny rules are used, it won't be able to parse it and will fail.
+
+For a workaround for that, you can use FreeGradeJSM and `free.security.policy` in your configuration. FreeGradeJSM works exactly like ProGradeJSM, only uses `free.security.policy` as a system property for finding the policy file.
+
+### Sample Gradle JUnit task
+
+```Groovy
+test {
+    systemProperty 'java.security.manager', 'net.sourceforge.prograde.sm.FreeGradeJSM'
+    systemProperty 'free.security.policy', 'files/perms/deny.policy'
+}
+```
 
 ## Java Policy File Generator
 

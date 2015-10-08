@@ -81,6 +81,45 @@ public class ProGradePolicy extends Policy {
      * Constructor of ProgradePolicyFile.
      */
     public ProGradePolicy() {
+        debug = checkDebugPolicy();
+        expandProperties = Boolean.parseBoolean(SecurityActions.getSecurityProperty("policy.expandProperties"));
+        String policyFile = SecurityActions.getSystemProperty("java.security.policy");
+        if (policyFile != null) {
+            skipDefaultPolicies = policyFile.startsWith("=");
+            if (skipDefaultPolicies) {
+                policyFile = policyFile.substring(1);
+            }
+            file = new File(policyFile);
+        } else {
+            skipDefaultPolicies = false;
+            file = null;
+        }
+        refresh();
+    }
+
+    /**
+     * Constructor of ProgradePolicyFile.
+     * @param systemNameForPolicyFile the file that has the deny/grant policy entries
+     *
+     */
+    public ProGradePolicy(String systemNameForPolicyFile) {
+        debug = checkDebugPolicy();
+        expandProperties = Boolean.parseBoolean(SecurityActions.getSecurityProperty("policy.expandProperties"));
+        String policyFile = SecurityActions.getSystemProperty(systemNameForPolicyFile);
+        if (policyFile != null) {
+            skipDefaultPolicies = policyFile.startsWith("=");
+            if (skipDefaultPolicies) {
+                policyFile = policyFile.substring(1);
+            }
+            file = new File(policyFile);
+        } else {
+            skipDefaultPolicies = false;
+            file = null;
+        }
+        refresh();
+    }
+
+    private boolean checkDebugPolicy() {
         String debugProperty = null;
         try {
             debugProperty = SecurityActions.getSystemProperty("java.security.debug");
@@ -101,20 +140,7 @@ public class ProGradePolicy extends Policy {
                 }
             }
         }
-        debug = debugPolicy;
-        expandProperties = Boolean.parseBoolean(SecurityActions.getSecurityProperty("policy.expandProperties"));
-        String policyFile = SecurityActions.getSystemProperty("java.security.policy");
-        if (policyFile != null) {
-            skipDefaultPolicies = policyFile.startsWith("=");
-            if (skipDefaultPolicies) {
-                policyFile = policyFile.substring(1);
-            }
-            file = new File(policyFile);
-        } else {
-            skipDefaultPolicies = false;
-            file = null;
-        }
-        refresh();
+        return debugPolicy;
     }
 
     /**
@@ -144,7 +170,7 @@ public class ProGradePolicy extends Policy {
                 try {
                     parsedPolicies.add(new Parser(debug).parse(reader));
                 } catch (Exception ex) {
-                    System.err.println("Unbale to parse policy. Exception message: " + ex.getMessage());
+                    System.err.println("Unable to parse policy. Exception message: " + ex.getMessage());
                 } finally {
                     try {
                         reader.close();
